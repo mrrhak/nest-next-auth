@@ -1,0 +1,46 @@
+{
+  "extends": "tsconfig/base.json",
+  "include": [
+    "./**/*.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "resolveJsonModule": true,
+    "paths": {
+      "@api/*": [
+        "src/apis/*"
+      ],
+      "@graphql/*": [
+        "src/graphql/*"
+      ],
+      "@common": [
+        "src/common"
+      ],
+      "@lib/*": [
+        "src/lib/*"
+      ],
+      "@schemas": [
+        "src/schemas"
+      ],
+    }
+  }
+}
