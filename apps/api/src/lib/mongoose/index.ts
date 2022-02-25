@@ -1,1 +1,1 @@
-export { MongooseModule } from './mongoose.module';
+export { MongooseLibModule } from './mongoose.lib.module';

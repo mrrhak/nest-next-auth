@@ -2,10 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { plainToClass } from 'class-transformer';
 import { validateSync } from 'class-validator';
 
-import { ConfigDto } from './config.dto';
+import { ConfigDto } from './config.lib.dto';
 
 @Injectable()
-export class ConfigService {
+export class ConfigLibService {
   readonly env: ConfigDto;
   private readonly envConfig: { [prop: string]: string };
 
@@ -23,11 +23,11 @@ export class ConfigService {
     const errors = validateSync(config as any, {
       whitelist: true,
       transform: true,
-      forbidNonWhitelisted: false,
+      forbidNonWhitelisted: false
     });
     if (errors.length > 0) {
       errors.forEach((e) =>
-        Logger.error(`${e.constraints[Object.keys(e.constraints)[0]]}`, module),
+        Logger.error(`${e.constraints[Object.keys(e.constraints)[0]]}`, module)
       );
     }
     return config as any;

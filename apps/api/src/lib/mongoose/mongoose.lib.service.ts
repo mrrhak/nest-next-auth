@@ -4,18 +4,18 @@ import {
   MongooseModuleOptions,
 } from '@nestjs/mongoose';
 
-import { ConfigService } from '@lib/config';
+import { ConfigLibService } from '@lib/config';
 
-import { MongooseConfig } from './mongoose.dto';
+import { MongooseLibConfig } from './mongoose.lib.dto';
 
 @Injectable()
-export class MongooseService implements MongooseOptionsFactory {
-  constructor(private readonly configService: ConfigService) {}
+export class MongooseLibService implements MongooseOptionsFactory {
+  constructor(private readonly configService: ConfigLibService) {}
 
   createMongooseOptions(): MongooseModuleOptions {
     const config = this.configService.validate(
       'MongooseModule',
-      MongooseConfig,
+      MongooseLibConfig,
     );
     return {
       uri: config.MONGO_DB_URI,

@@ -5,7 +5,10 @@
     "./apps/web",
   ],
   "cSpell.words": [
+    "browserconfig",
+    "msapplication",
     "nestjs",
+    "QLISO",
     "tailwindcss",
     "turborepo",
     "typy"

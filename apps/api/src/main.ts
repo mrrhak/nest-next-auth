@@ -1,4 +1,4 @@
-import { ConfigService } from '@lib/config';
+import { ConfigLibService } from '@lib/config';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -12,7 +12,7 @@ async function bootstrap() {
   //   }),
   // );
 
-  const config = app.get(ConfigService);
+  const config = app.get(ConfigLibService);
   const port = config.get('PORT');
 
   await app.listen(port);
