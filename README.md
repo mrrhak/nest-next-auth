@@ -3,7 +3,7 @@
 </p>
 <p align="center">
   <a href="http://nestjs.com/" style="margin-right: 32px;" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="120" alt="Nest Logo" /></a>
-  <a href="https://nextjs.org" target="blank"><img src="https://iconape.com/wp-content/files/gf/82292/svg/nextjs-3.svg" width="80" alt="Next Logo" /></a>
+  <a href="https://nextjs.org" target="blank"><img src="https://sebastian-gomez.com/nextjs.png" width="50" alt="Next Logo" /></a>
 </p>
 
 # Turborepo starter
