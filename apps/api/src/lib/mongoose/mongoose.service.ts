@@ -21,8 +21,6 @@ export class MongooseService implements MongooseOptionsFactory {
       uri: config.MONGO_DB_URI,
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useFindAndModify: false,
-      useCreateIndex: true,
     };
   }
 }

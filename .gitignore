@@ -48,6 +48,7 @@ yarn-error.log*
 lerna-debug.log*
 
 # local env files
+.env.local
 .env.development
 .env.production
 .env.test
