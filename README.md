@@ -1,3 +1,11 @@
+<p align="center">
+  <a href="https://turborepo.org/" target="blank"><img width="340" alt="Turborepo logo" src="https://user-images.githubusercontent.com/4060187/106504110-82f58d00-6494-11eb-87b7-a16d4f68bc5a.png"></a>
+</p>
+<p align="center">
+  <a href="http://nestjs.com/" style="margin-right: 32px;" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="120" alt="Nest Logo" /></a>
+  <a href="https://nextjs.org" target="blank"><img src="https://iconape.com/wp-content/files/gf/82292/svg/nextjs-3.svg" width="80" alt="Next Logo" /></a>
+</p>
+
 # Turborepo starter
 
 This is an official Yarn v1 starter turborepo.
@@ -8,8 +16,9 @@ This turborepo uses [Yarn](https://classic.yarnpkg.com/lang/en/) as a package ma
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org) app
-- `web`: another [Next.js](https://nextjs.org) app
+- `api`: a [NestJs](http://nestjs.com) app
+- `web`: a [Next.js](https://nextjs.org) app
+- `docs`: another [Next.js](https://nextjs.org) app
 - `ui`: a stub React component library shared by both `web` and `docs` applications
 - `config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
 - `tsconfig`: `tsconfig.json`s used throughout the monorepo
