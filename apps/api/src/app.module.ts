@@ -4,16 +4,18 @@ import { MongooseLibModule } from '@lib/mongoose';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { GraphqlModule } from './graphql/graphql.module';
+import { GraphQLModule } from './graphql/graphql.module';
+import { ThrottlerLibModule } from './lib/throttler/throttler.lib.module';
 
 @Module({
   imports: [
     ConfigLibModule,
     MongooseLibModule,
     GraphQLLibModule,
-    GraphqlModule,
+    GraphQLModule,
+    ThrottlerLibModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
 })
 export class AppModule {}

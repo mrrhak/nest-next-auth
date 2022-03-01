@@ -3,6 +3,6 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [AuthModule, UserModule],
+  imports: [AuthModule, UserModule]
 })
-export class GraphqlModule {}
+export class GraphQLModule {}

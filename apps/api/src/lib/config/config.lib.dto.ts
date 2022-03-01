@@ -26,4 +26,16 @@ export class ConfigDto {
 
   @IsNotEmpty()
   COOKIES_REFRESH_TOKEN_NAME: string;
+
+  @IsNotEmpty()
+  COOKIES_ACCESS_TOKEN_EXPIRED: string;
+
+  @IsNotEmpty()
+  COOKIES_REFRESH_TOKEN_EXPIRED: string;
+
+  @IsNotEmpty()
+  THROTTLE_TTL: string;
+
+  @IsNotEmpty()
+  THROTTLE_LIMIT: string;
 }

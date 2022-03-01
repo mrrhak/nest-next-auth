@@ -8,12 +8,17 @@ import { GraphQLError } from 'graphql';
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
+      cors: {
+        credentials: true,
+        origin: ['http://localhost:3001']
+      },
       plugins: [ApolloServerPluginInlineTraceDisabled()],
       autoSchemaFile: 'schema.gql',
       introspection: true,
       debug: process.env.NODE_ENV !== 'production',
       playground: process.env.NODE_ENV !== 'production',
       formatError: (error: GraphQLError) => {
+        console.log(error.message);
         const ext = error.extensions as any;
         if (
           ext?.response &&
@@ -22,15 +27,19 @@ import { GraphQLError } from 'graphql';
         ) {
           ext.response.message = ext.response.message[0];
         }
-        return {
-          message: 'Http Exception',
-          locations: error.locations,
-          path: error.path,
-          extensions: ext,
-        };
+
+        if (ext.response?.message) {
+          return {
+            message: ext.response.message,
+            locations: error.locations,
+            path: error.path,
+            extensions: ext
+          };
+        }
+        return error;
       },
-      context: ({ req }) => ({ req }),
-    }),
-  ],
+      context: ({ req, res }) => ({ req, res })
+    })
+  ]
 })
 export class GraphQLLibModule {}

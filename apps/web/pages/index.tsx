@@ -1,4 +1,5 @@
 import {Button} from "ui";
+import {useGetUsersQuery} from "../generated/graphql";
 
 export default function Web() {
   return (

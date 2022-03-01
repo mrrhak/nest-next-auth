@@ -1,11 +1,27 @@
+import {GetServerSideProps} from "next";
+import {useSignInMutation} from "../../generated/graphql";
+
 const SignIn = () => {
-  const handleFormSubmit = (e: any) => {
+  const [signInMutation, {data, loading, error}] = useSignInMutation();
+
+  const handleFormSubmit = async (e: any) => {
     e.preventDefault();
 
-    let email = e.target.elements.email?.value;
+    let usernameOrEmail = e.target.elements.usernameOrEmail?.value;
     let password = e.target.elements.password?.value;
 
-    console.log(email, password);
+    try {
+      await signInMutation({
+        variables: {
+          input: {
+            usernameOrEmail,
+            password,
+          },
+        },
+      });
+    } catch (e) {
+      console.log(e.message);
+    }
   };
 
   return (
@@ -17,11 +33,11 @@ const SignIn = () => {
 
         <form onSubmit={handleFormSubmit} className="mt-4">
           <div className="flex flex-col">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="usernameOrEmail">Username or Email</label>
             <input
-              type="email"
-              id="email"
-              placeholder="Your Email"
+              type="text"
+              id="usernameOrEmail"
+              placeholder="Username or Email"
               className="rounded"
             />
           </div>
@@ -30,7 +46,7 @@ const SignIn = () => {
             <input
               type="password"
               id="password"
-              placeholder="Your Password"
+              placeholder="Password"
               className="rounded"
             />
           </div>
@@ -46,3 +62,31 @@ const SignIn = () => {
 };
 
 export default SignIn;
+
+//! Running at server side (can not redirect)
+// SignIn.getInitialProps = async ({req}) => {
+//   console.log("getInitialProps");
+//   const cookie = req.cookies["some-cookie"] ?? {};
+//   console.log(cookie);
+//   return cookie;
+// };
+
+//! Running at server side (can redirect)
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  console.log("getServerSideProps");
+  const cookie = context.req.cookies["some-cookie"] ?? {};
+  console.log(cookie);
+
+  // if (cookie) {
+  //   return {
+  //     redirect: {
+  //       destination: "/home",
+  //       permanent: false,
+  //     },
+  //   };
+  // }
+
+  return {
+    props: {}, // will be passed to the page component as props
+  };
+};

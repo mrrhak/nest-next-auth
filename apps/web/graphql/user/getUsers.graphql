@@ -1,0 +1,20 @@
+query GetUsers($filter: FilterUserInput!) {
+  getUsers(filter: $filter) {
+    metadata {
+      page
+      limit
+      total
+    }
+    records {
+      id
+      firstName
+      lastName
+      username
+      email
+      createdBy
+      updatedBy
+      createdAt
+      updatedAt
+    }
+  }
+}

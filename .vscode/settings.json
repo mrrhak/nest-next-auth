@@ -5,7 +5,10 @@
     "./apps/web",
   ],
   "cSpell.words": [
+    "bingbot",
     "browserconfig",
+    "codegen",
+    "googlebot",
     "msapplication",
     "nestjs",
     "QLISO",

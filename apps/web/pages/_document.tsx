@@ -67,7 +67,7 @@ class MyDocument extends Document {
             href="/icons/safari-pinned-tab.svg"
             color="#29A0B1"
           />
-          <link rel="shortcut icon" href="/favicon.ico" />
+          <link rel="shortcut icon" href="/icons/favicon.ico" />
 
           <meta name="twitter:card" content="summary" />
           <meta name="twitter:url" content="https://twitter.com" />

@@ -1,11 +1,32 @@
+import {useSignUpMutation} from "../../generated/graphql";
+
 const SignUp = () => {
-  const handleFormSubmit = (e: any) => {
+  const [signUpMutation, {data, loading, error}] = useSignUpMutation();
+
+  const handleFormSubmit = async (e: any) => {
     e.preventDefault();
 
-    let email = e.target.elements.email?.value;
-    let password = e.target.elements.password?.value;
+    const firstName = e.target.elements.firstName?.value;
+    const lastName = e.target.elements.lastName?.value;
+    const username = e.target.elements.username?.value;
+    const email = e.target.elements.email?.value;
+    const password = e.target.elements.password?.value;
 
-    console.log(email, password);
+    try {
+      await signUpMutation({
+        variables: {
+          input: {
+            firstName,
+            lastName,
+            username,
+            email,
+            password,
+          },
+        },
+      });
+    } catch (e) {
+      console.log(e.message);
+    }
   };
 
   return (
@@ -14,6 +35,7 @@ const SignUp = () => {
         <h1 className="text-center font-bold text-xl">Sign Up an account</h1>
 
         <form onSubmit={handleFormSubmit} className="mt-4">
+          <input type="hidden" name="_csrf" value="{{csrfToken}}"></input>
           <div className="flex flex-col">
             <label htmlFor="firstName">First Name</label>
             <input
@@ -29,6 +51,15 @@ const SignUp = () => {
               type="text"
               id="lastName"
               placeholder="Last Name"
+              className="rounded"
+            />
+          </div>
+          <div className="flex flex-col mt-2">
+            <label htmlFor="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              placeholder="Username"
               className="rounded"
             />
           </div>
@@ -52,7 +83,7 @@ const SignUp = () => {
           </div>
           <div className=" text-center mt-4">
             <button className="bg-green-500 text-white w-36 py-2 rounded">
-              Sign Up
+              {loading ? "Loading..." : "Sign Up"}
             </button>
           </div>
         </form>
