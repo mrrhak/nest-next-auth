@@ -1,7 +1,9 @@
-import {useSignUpMutation} from "../../generated/graphql";
+import {useRouter} from "next/router";
+import {useRegisterMutation} from "../../generated/graphql";
 
-const SignUp = () => {
-  const [signUpMutation, {data, loading, error}] = useSignUpMutation();
+const Register = () => {
+  const router = useRouter();
+  const [registerMutation, {data, loading, error}] = useRegisterMutation();
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
@@ -13,7 +15,7 @@ const SignUp = () => {
     const password = e.target.elements.password?.value;
 
     try {
-      await signUpMutation({
+      await registerMutation({
         variables: {
           input: {
             firstName,
@@ -24,18 +26,23 @@ const SignUp = () => {
           },
         },
       });
-    } catch (e) {
-      console.log(e.message);
-    }
+    } catch (_) {}
   };
+
+  if (data) {
+    router.push("/profile");
+  } else if (error) {
+    console.log(error.message);
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white rounded-2xl shadow-2xl w-96 p-8">
-        <h1 className="text-center font-bold text-xl">Sign Up an account</h1>
+        <h1 className="text-center font-bold text-xl uppercase">
+          Register an account
+        </h1>
 
         <form onSubmit={handleFormSubmit} className="mt-4">
-          <input type="hidden" name="_csrf" value="{{csrfToken}}"></input>
           <div className="flex flex-col">
             <label htmlFor="firstName">First Name</label>
             <input
@@ -83,7 +90,7 @@ const SignUp = () => {
           </div>
           <div className=" text-center mt-4">
             <button className="bg-green-500 text-white w-36 py-2 rounded">
-              {loading ? "Loading..." : "Sign Up"}
+              {loading ? "Processing..." : "Register"}
             </button>
           </div>
         </form>
@@ -92,4 +99,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default Register;

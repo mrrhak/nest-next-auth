@@ -3,7 +3,7 @@ import { HashLibService } from '@lib/hash';
 import { JwtLibService } from '@lib/jwt';
 import { Tokens } from '@lib/jwt/types';
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { SignInInput, SignUpInput } from './dto/auth.input.dto';
+import { LoginInput, RegisterInput } from './dto/auth.input.dto';
 import { AuthModel } from './dto/auth.model.dto';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class AuthService {
     private readonly jwtService: JwtLibService
   ) {}
 
-  async signUp(input: SignUpInput): Promise<AuthModel> {
+  async register(input: RegisterInput): Promise<AuthModel> {
     const user = await this.userService.createUser(input);
     const tokens: Tokens = await this.jwtService.getTokens(user.id);
     const hashRefreshToken = await this.hashService.hash(tokens.refreshToken);
@@ -26,7 +26,7 @@ export class AuthService {
     return tokens;
   }
 
-  async signIn(input: SignInInput): Promise<Tokens> {
+  async login(input: LoginInput): Promise<Tokens> {
     const user = await this.userService.model.findOne({
       $or: [
         { email: input.usernameOrEmail },
@@ -54,7 +54,7 @@ export class AuthService {
     return tokens;
   }
 
-  async signOut(userId: string): Promise<boolean> {
+  async logout(userId: string): Promise<boolean> {
     const user = await this.userService.findOne({ id: userId });
     if (!user || !user.refreshToken) {
       throw new ForbiddenException();

@@ -57,14 +57,14 @@ input FilterUserInput {
 }
 
 type Mutation {
-  signUp(input: SignUpInput!): AuthModel!
-  signIn(input: SignInInput!): AuthModel!
-  signOut: Boolean!
+  register(input: RegisterInput!): AuthModel!
+  login(input: LoginInput!): AuthModel!
+  logout: Boolean!
   refreshToken: AuthModel!
   createUser(input: CreateUserInput!): UserModel!
 }
 
-input SignUpInput {
+input RegisterInput {
   firstName: String!
   lastName: String!
   username: String!
@@ -72,7 +72,7 @@ input SignUpInput {
   password: String!
 }
 
-input SignInInput {
+input LoginInput {
   usernameOrEmail: String!
   password: String!
 }

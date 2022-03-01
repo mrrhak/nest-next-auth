@@ -8,7 +8,7 @@ import { ConfigLibService } from '@lib/config';
 import { BadRequestException, UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { AuthService } from './auth.service';
-import { SignInInput, SignUpInput } from './dto/auth.input.dto';
+import { LoginInput, RegisterInput } from './dto/auth.input.dto';
 import { AuthModel } from './dto/auth.model.dto';
 
 @Resolver(() => AuthModel)
@@ -49,12 +49,12 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthModel)
-  async signUp(
-    @Args('input') input: SignUpInput,
+  async register(
+    @Args('input') input: RegisterInput,
     @Context() ctx: any
   ): Promise<AuthModel> {
     try {
-      const authToken = await this.authService.signUp(input);
+      const authToken = await this.authService.register(input);
       this._setAuthCookies(ctx, authToken);
       return authToken;
     } catch (error: any) {
@@ -69,23 +69,23 @@ export class AuthResolver {
   }
 
   @Mutation(() => AuthModel)
-  async signIn(
-    @Args('input') input: SignInInput,
+  async login(
+    @Args('input') input: LoginInput,
     @Context() ctx: any
   ): Promise<AuthModel> {
-    const authToken = await this.authService.signIn(input);
+    const authToken = await this.authService.login(input);
     this._setAuthCookies(ctx, authToken);
     return authToken;
   }
 
   @UseGuards(GqlAtGuard)
   @Mutation(() => Boolean)
-  async signOut(
+  async logout(
     @GqlGetCurrentUserId() userId: string,
     @Context() ctx: any
   ): Promise<boolean> {
     this._clearAuthCookies(ctx);
-    return await this.authService.signOut(userId);
+    return await this.authService.logout(userId);
   }
 
   @UseGuards(GqlRtGuard)

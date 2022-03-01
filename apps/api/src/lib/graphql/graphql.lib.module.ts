@@ -18,7 +18,6 @@ import { GraphQLError } from 'graphql';
       debug: process.env.NODE_ENV !== 'production',
       playground: process.env.NODE_ENV !== 'production',
       formatError: (error: GraphQLError) => {
-        console.log(error.message);
         const ext = error.extensions as any;
         if (
           ext?.response &&

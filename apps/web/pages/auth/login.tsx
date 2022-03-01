@@ -1,8 +1,9 @@
-import {GetServerSideProps} from "next";
-import {useSignInMutation} from "../../generated/graphql";
+import {useRouter} from "next/router";
+import {useLoginMutation} from "../../generated/graphql";
 
-const SignIn = () => {
-  const [signInMutation, {data, loading, error}] = useSignInMutation();
+const Login = () => {
+  const router = useRouter();
+  const [loginMutation, {data, loading, error}] = useLoginMutation();
 
   const handleFormSubmit = async (e: any) => {
     e.preventDefault();
@@ -11,7 +12,7 @@ const SignIn = () => {
     let password = e.target.elements.password?.value;
 
     try {
-      await signInMutation({
+      await loginMutation({
         variables: {
           input: {
             usernameOrEmail,
@@ -19,16 +20,20 @@ const SignIn = () => {
           },
         },
       });
-    } catch (e) {
-      console.log(e.message);
-    }
+    } catch (_) {}
   };
+
+  if (data) {
+    router.push("/profile");
+  } else if (error) {
+    console.log(error.message);
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white rounded-2xl shadow-2xl w-96 p-8">
-        <h1 className="text-center font-bold text-xl">
-          Sign in to your account
+        <h1 className="text-center font-bold text-xl uppercase">
+          Login to your account
         </h1>
 
         <form onSubmit={handleFormSubmit} className="mt-4">
@@ -52,7 +57,7 @@ const SignIn = () => {
           </div>
           <div className=" text-center mt-4">
             <button className="bg-blue-500 text-white w-36 py-2 rounded">
-              Sign In
+              {loading ? "Processing..." : "Login"}
             </button>
           </div>
         </form>
@@ -61,10 +66,10 @@ const SignIn = () => {
   );
 };
 
-export default SignIn;
+export default Login;
 
 //! Running at server side (can not redirect)
-// SignIn.getInitialProps = async ({req}) => {
+// Login.getInitialProps = async ({req}) => {
 //   console.log("getInitialProps");
 //   const cookie = req.cookies["some-cookie"] ?? {};
 //   console.log(cookie);
@@ -72,21 +77,21 @@ export default SignIn;
 // };
 
 //! Running at server side (can redirect)
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  console.log("getServerSideProps");
-  const cookie = context.req.cookies["some-cookie"] ?? {};
-  console.log(cookie);
+// export const getServerSideProps: GetServerSideProps = async (context) => {
+//   console.log("getServerSideProps");
+//   const cookie = context.req.cookies["some-cookie"] ?? {};
+//   console.log(cookie);
 
-  // if (cookie) {
-  //   return {
-  //     redirect: {
-  //       destination: "/home",
-  //       permanent: false,
-  //     },
-  //   };
-  // }
+//   // if (cookie) {
+//   //   return {
+//   //     redirect: {
+//   //       destination: "/home",
+//   //       permanent: false,
+//   //     },
+//   //   };
+//   // }
 
-  return {
-    props: {}, // will be passed to the page component as props
-  };
-};
+//   return {
+//     props: {}, // will be passed to the page component as props
+//   };
+// };

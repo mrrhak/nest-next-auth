@@ -1,6 +1,0 @@
-mutation SignUp($input: SignUpInput!) {
-  signUp(input: $input) {
-    accessToken
-    refreshToken
-  }
-}
