@@ -4,9 +4,16 @@ import {
   GqlGetCurrentUserId,
   GqlRtGuard
 } from '@common';
+import { UserModel } from '@graphql/user/dto/user.model';
 import { ConfigLibService } from '@lib/config';
-import { BadRequestException, UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+  UseGuards
+} from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { CookieOptions } from 'express';
 import { AuthService } from './auth.service';
 import { LoginInput, RegisterInput } from './dto/auth.input.dto';
 import { AuthModel } from './dto/auth.model.dto';
@@ -19,26 +26,29 @@ export class AuthResolver {
   ) {}
 
   private _setAuthCookies(ctx: any, authModel: AuthModel) {
+    const isProduction = this.configService.env.NODE_ENV === 'production';
+    const defaultCookieOptions: CookieOptions = {
+      httpOnly: true,
+      path: '/',
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax'
+      // domain: '',
+    };
+
     ctx.res.cookie(
       this.configService.env.COOKIES_ACCESS_TOKEN_NAME,
       `Bearer ${authModel.accessToken}`,
       {
-        httpOnly: true,
-        maxAge: Number(this.configService.env.COOKIES_ACCESS_TOKEN_EXPIRED),
-        path: '/',
-        sameSite: 'strict',
-        secure: true
+        ...defaultCookieOptions,
+        maxAge: Number(this.configService.env.COOKIES_ACCESS_TOKEN_EXPIRED)
       }
     );
     ctx.res.cookie(
       this.configService.env.COOKIES_REFRESH_TOKEN_NAME,
       authModel.refreshToken,
       {
-        httpOnly: true,
-        maxAge: Number(this.configService.env.COOKIES_REFRESH_TOKEN_EXPIRED),
-        path: '/',
-        sameSite: 'strict',
-        secure: true
+        ...defaultCookieOptions,
+        maxAge: Number(this.configService.env.COOKIES_REFRESH_TOKEN_EXPIRED)
       }
     );
   }
@@ -90,13 +100,28 @@ export class AuthResolver {
 
   @UseGuards(GqlRtGuard)
   @Mutation(() => AuthModel)
-  async refreshToken(
+  async renewToken(
     @GqlGetCurrentUserId() userId: string,
     @GqlGetCurrentUser('refreshToken') refreshToken: string,
     @Context() ctx: any
   ): Promise<AuthModel> {
-    const authToken = await this.authService.refreshToken(userId, refreshToken);
-    this._setAuthCookies(ctx, authToken);
-    return authToken;
+    try {
+      const authToken = await this.authService.renewToken(userId, refreshToken);
+      this._setAuthCookies(ctx, authToken);
+      return authToken;
+    } catch (error) {
+      this._clearAuthCookies(ctx);
+      throw new ForbiddenException('Refresh token is invalid');
+    }
+  }
+
+  @UseGuards(GqlAtGuard)
+  @Query(() => UserModel)
+  async getAuthUser(@GqlGetCurrentUserId() userId: string): Promise<UserModel> {
+    const authUser = await this.authService.getAuthUser(userId);
+    if (!authUser) {
+      throw new NotFoundException('User not found');
+    }
+    return authUser;
   }
 }

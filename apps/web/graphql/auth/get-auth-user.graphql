@@ -1,0 +1,10 @@
+query GetAuthUser {
+  getAuthUser {
+    id
+    firstName
+    lastName
+    username
+    email
+    status
+  }
+}

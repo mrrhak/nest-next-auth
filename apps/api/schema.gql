@@ -8,11 +8,6 @@ type Metadata {
   page: Int!
 }
 
-type AuthModel {
-  accessToken: String!
-  refreshToken: String!
-}
-
 type UserModel {
   createdBy: String
   createdAt: DateTime!
@@ -42,7 +37,13 @@ type PaginatedUserModel {
   metadata: Metadata
 }
 
+type AuthModel {
+  accessToken: String!
+  refreshToken: String!
+}
+
 type Query {
+  getAuthUser: UserModel!
   getUser(id: String!): UserModel!
   getUsers(filter: FilterUserInput!): PaginatedUserModel!
 }
@@ -60,7 +61,7 @@ type Mutation {
   register(input: RegisterInput!): AuthModel!
   login(input: LoginInput!): AuthModel!
   logout: Boolean!
-  refreshToken: AuthModel!
+  renewToken: AuthModel!
   createUser(input: CreateUserInput!): UserModel!
 }
 

@@ -1,0 +1,6 @@
+mutation RenewToken {
+  renewToken {
+    accessToken
+    refreshToken
+  }
+}

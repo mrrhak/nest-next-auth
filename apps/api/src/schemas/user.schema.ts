@@ -22,7 +22,11 @@ export class User {
   @Prop()
   password: string;
 
-  @Prop({ enum: Object.values(E.StatusEnum), createdIndex: true })
+  @Prop({
+    enum: Object.values(E.StatusEnum),
+    default: E.StatusEnum.ACTIVE,
+    createdIndex: true
+  })
   status!: E.StatusEnum;
 
   @Prop({ default: null })

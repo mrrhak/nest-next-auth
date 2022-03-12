@@ -15,7 +15,11 @@ export class AuthService {
   ) {}
 
   async register(input: RegisterInput): Promise<AuthModel> {
-    const user = await this.userService.createUser(input);
+    const user = await this.userService.createUser({
+      ...input,
+      username: input.username.toLowerCase(),
+      email: input.email.toLowerCase()
+    });
     const tokens: Tokens = await this.jwtService.getTokens(user.id);
     const hashRefreshToken = await this.hashService.hash(tokens.refreshToken);
     await this.userService.update({
@@ -29,8 +33,8 @@ export class AuthService {
   async login(input: LoginInput): Promise<Tokens> {
     const user = await this.userService.model.findOne({
       $or: [
-        { email: input.usernameOrEmail },
-        { username: input.usernameOrEmail }
+        { email: input.usernameOrEmail.toLowerCase() },
+        { username: input.usernameOrEmail.toLowerCase() }
       ]
     });
     if (!user) {
@@ -56,22 +60,21 @@ export class AuthService {
 
   async logout(userId: string): Promise<boolean> {
     const user = await this.userService.findOne({ id: userId });
-    if (!user || !user.refreshToken) {
-      throw new ForbiddenException();
+    if (user) {
+      await this.userService.update({ id: userId, refreshToken: null });
     }
-
-    await this.userService.update({ id: userId, refreshToken: null });
     return true;
   }
 
-  async refreshToken(userId: string, rt: string): Promise<Tokens> {
+  async renewToken(userId: string, rt: string): Promise<Tokens> {
     const user = await this.userService.findOne({ id: userId });
     if (!user || !user.refreshToken) {
-      throw new ForbiddenException('Refresh token is invalid');
+      throw new ForbiddenException('Refresh token is no longer available');
     }
 
     const isMatched = await this.hashService.isMatch(rt, user.refreshToken);
-    if (!isMatched) throw new ForbiddenException('Refresh token is invalid');
+    if (!isMatched)
+      throw new ForbiddenException('Refresh token is miss matched');
 
     const tokens: Tokens = await this.jwtService.getTokens(user.id);
     const hashRefreshToken = await this.hashService.hash(tokens.refreshToken);
@@ -80,5 +83,9 @@ export class AuthService {
       refreshToken: hashRefreshToken
     });
     return tokens;
+  }
+
+  async getAuthUser(id: string): Promise<any> {
+    return await this.userService.getUser({ id });
   }
 }

@@ -9,9 +9,11 @@
     "browserconfig",
     "codegen",
     "googlebot",
+    "heroicons",
     "msapplication",
     "nestjs",
     "QLISO",
+    "semibold",
     "tailwindcss",
     "turborepo",
     "typy"

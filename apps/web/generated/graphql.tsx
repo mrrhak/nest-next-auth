@@ -57,8 +57,8 @@ export type Mutation = {
   createUser: UserModel;
   login: AuthModel;
   logout: Scalars['Boolean'];
-  refreshToken: AuthModel;
   register: AuthModel;
+  renewToken: AuthModel;
 };
 
 
@@ -84,6 +84,7 @@ export type PaginatedUserModel = {
 
 export type Query = {
   __typename?: 'Query';
+  getAuthUser: UserModel;
   getUser: UserModel;
   getUsers: PaginatedUserModel;
 };
@@ -126,6 +127,11 @@ export type UserModel = {
   username: Scalars['String'];
 };
 
+export type GetAuthUserQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetAuthUserQuery = { __typename?: 'Query', getAuthUser: { __typename?: 'UserModel', id: string, firstName: string, lastName: string, username: string, email: string, status: StatusEnum } };
+
 export type LoginMutationVariables = Exact<{
   input: LoginInput;
 }>;
@@ -145,6 +151,11 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'AuthModel', accessToken: string, refreshToken: string } };
 
+export type RenewTokenMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RenewTokenMutation = { __typename?: 'Mutation', renewToken: { __typename?: 'AuthModel', accessToken: string, refreshToken: string } };
+
 export type GetUserQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
@@ -153,6 +164,45 @@ export type GetUserQueryVariables = Exact<{
 export type GetUserQuery = { __typename?: 'Query', getUser: { __typename?: 'UserModel', id: string, firstName: string, lastName: string, username: string, email: string, status: StatusEnum } };
 
 
+export const GetAuthUserDocument = gql`
+    query GetAuthUser {
+  getAuthUser {
+    id
+    firstName
+    lastName
+    username
+    email
+    status
+  }
+}
+    `;
+
+/**
+ * __useGetAuthUserQuery__
+ *
+ * To run a query within a React component, call `useGetAuthUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetAuthUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetAuthUserQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetAuthUserQuery(baseOptions?: Apollo.QueryHookOptions<GetAuthUserQuery, GetAuthUserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetAuthUserQuery, GetAuthUserQueryVariables>(GetAuthUserDocument, options);
+      }
+export function useGetAuthUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetAuthUserQuery, GetAuthUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetAuthUserQuery, GetAuthUserQueryVariables>(GetAuthUserDocument, options);
+        }
+export type GetAuthUserQueryHookResult = ReturnType<typeof useGetAuthUserQuery>;
+export type GetAuthUserLazyQueryHookResult = ReturnType<typeof useGetAuthUserLazyQuery>;
+export type GetAuthUserQueryResult = Apollo.QueryResult<GetAuthUserQuery, GetAuthUserQueryVariables>;
 export const LoginDocument = gql`
     mutation Login($input: LoginInput!) {
   login(input: $input) {
@@ -251,6 +301,39 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const RenewTokenDocument = gql`
+    mutation RenewToken {
+  renewToken {
+    accessToken
+    refreshToken
+  }
+}
+    `;
+export type RenewTokenMutationFn = Apollo.MutationFunction<RenewTokenMutation, RenewTokenMutationVariables>;
+
+/**
+ * __useRenewTokenMutation__
+ *
+ * To run a mutation, you first call `useRenewTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRenewTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [renewTokenMutation, { data, loading, error }] = useRenewTokenMutation({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useRenewTokenMutation(baseOptions?: Apollo.MutationHookOptions<RenewTokenMutation, RenewTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RenewTokenMutation, RenewTokenMutationVariables>(RenewTokenDocument, options);
+      }
+export type RenewTokenMutationHookResult = ReturnType<typeof useRenewTokenMutation>;
+export type RenewTokenMutationResult = Apollo.MutationResult<RenewTokenMutation>;
+export type RenewTokenMutationOptions = Apollo.BaseMutationOptions<RenewTokenMutation, RenewTokenMutationVariables>;
 export const GetUserDocument = gql`
     query GetUser($id: String!) {
   getUser(id: $id) {
