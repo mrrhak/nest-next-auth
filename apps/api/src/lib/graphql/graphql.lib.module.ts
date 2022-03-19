@@ -15,6 +15,11 @@ import { GraphQLError } from 'graphql';
       plugins: [ApolloServerPluginInlineTraceDisabled()],
       autoSchemaFile: 'schema.gql',
       introspection: true,
+      subscriptions: {
+        'graphql-ws': {
+          path: '/graphql'
+        }
+      },
       debug: process.env.NODE_ENV !== 'production',
       playground: process.env.NODE_ENV !== 'production',
       formatError: (error: GraphQLError) => {

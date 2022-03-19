@@ -3,11 +3,26 @@ import {useForm} from "react-hook-form";
 import {useLoginMutation} from "../../generated/graphql";
 import {UserIcon, LockClosedIcon} from "@heroicons/react/outline";
 import Image from "next/image";
-import {setApolloGraphQLClient} from "../../graphql/apollo-client";
+import {useCallback} from "react";
+import {toast, TypeOptions} from "react-toastify";
 
 const Login = () => {
   const router = useRouter();
-  const [loginMutation, {data, loading, error}] = useLoginMutation();
+  const [loginMutation, {data, loading}] = useLoginMutation();
+
+  //! Toast
+  const notify = useCallback((type: TypeOptions, message: string) => {
+    toast(message, {
+      position: "top-center",
+      autoClose: 5000,
+      type,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }, []);
 
   const {
     register,
@@ -26,13 +41,13 @@ const Login = () => {
           },
         },
       });
-    } catch (_) {}
+    } catch (error) {
+      notify("error", error.message);
+    }
   };
 
   if (data) {
-    router.push("/account/profile");
-  } else if (error) {
-    console.log(error.message);
+    router.push("/");
   }
 
   return (

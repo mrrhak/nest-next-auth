@@ -5,9 +5,12 @@
     "./apps/web",
   ],
   "cSpell.words": [
+    "autopopulate",
     "bingbot",
     "browserconfig",
+    "Casl",
     "codegen",
+    "cwebsocket",
     "googlebot",
     "heroicons",
     "msapplication",
@@ -15,6 +18,7 @@
     "QLISO",
     "semibold",
     "tailwindcss",
+    "toastify",
     "turborepo",
     "typy"
   ],

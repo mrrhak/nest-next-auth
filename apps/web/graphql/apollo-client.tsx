@@ -1,22 +1,27 @@
 import {
   ApolloClient,
-  FetchResult,
   from,
   gql,
   HttpLink,
   InMemoryCache,
   NormalizedCacheObject,
   Observable,
+  split,
 } from "@apollo/client";
 import {onError} from "@apollo/client/link/error";
 import {setContext} from "@apollo/client/link/context";
-import {GetServerSidePropsContext, NextPageContext} from "next";
+import {GetServerSidePropsContext} from "next";
 import {useMemo} from "react";
 import {
   AuthModel,
   RenewTokenDocument,
   RenewTokenMutation,
 } from "../generated/graphql";
+import {getMainDefinition} from "@apollo/client/utilities";
+import {createClient} from "graphql-ws";
+import {GraphQLWsLink} from "@apollo/client/link/subscriptions";
+import {w3cwebsocket} from "websocket";
+import Router from "next/router";
 
 let _graphQLApolloClientGlobal: ApolloClient<NormalizedCacheObject> | undefined;
 
@@ -42,7 +47,12 @@ const _errorLink = onError(
           )
         );
 
-        if (operation.operationName === "RenewToken") return;
+        if (operation.operationName === "RenewToken") {
+          console.log("RenewToken error");
+
+          // redirect to login
+          Router.push("/auth/login");
+        }
 
         for (let err of graphQLErrors) {
           switch (err.extensions.code) {
@@ -88,29 +98,70 @@ const _errorLink = onError(
   }
 );
 
+const createHttpLink = (headers?: Record<string, unknown>) => {
+  const httpLink = new HttpLink({
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_HTTP_ENDPOINT,
+    credentials: "include",
+    headers,
+    fetch,
+  });
+  return httpLink;
+};
+
+const createWSLink = () => {
+  return new GraphQLWsLink(
+    createClient({
+      url: process.env.NEXT_PUBLIC_GRAPHQL_WSS_ENDPOINT,
+      webSocketImpl: w3cwebsocket,
+      lazy: true,
+      connectionParams: async () => {
+        console.log("Connection params WSS called");
+        const authModel = await getRenewAuthToken(); // happens on the client
+        return {
+          Authorization: `Bearer ${authModel.accessToken}`,
+        };
+
+        //   //   return {
+        //   //     headers: {
+        //   //       authorization: _accessToken
+        //   //         ? `Bearer ${authModel.accessToken}`
+        //   //         : "Public",
+        //   //     },
+        //   //   };
+      },
+    })
+  );
+};
+
+const splitLink = (headers?: Record<string, unknown>) => {
+  return split(
+    ({query}) => {
+      const definition = getMainDefinition(query);
+      return (
+        definition.kind === "OperationDefinition" &&
+        definition.operation === "subscription"
+      );
+    },
+    createWSLink(),
+    createHttpLink(headers)
+  );
+};
+
 export function createGraphQLApolloClient(
   initHeaders?: Record<string, string>
 ): ApolloClient<NormalizedCacheObject> {
-  const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_ENDPOINT,
-    credentials: "include",
+  const ssrMode = typeof window === "undefined";
+
+  const auth = setContext((_, {headers}) => {
+    return {headers: {...headers, ...initHeaders}};
   });
 
-  const authLink = setContext((_, {headers}) => {
-    return {
-      headers: {
-        ...headers,
-        ...initHeaders,
-      },
-    };
-  });
-
-  const link = authLink.concat(httpLink);
+  const authLink = auth.concat(splitLink(initHeaders));
 
   return new ApolloClient({
-    connectToDevTools: typeof window !== "undefined",
-    ssrMode: typeof window === "undefined",
-    link: from([_errorLink, link]),
+    connectToDevTools: !ssrMode,
+    ssrMode,
+    link: from([_errorLink, authLink]),
     cache: new InMemoryCache(),
     credentials: "include",
   });
@@ -122,10 +173,20 @@ const _initialGraphQLApolloClient = (
 ) => {
   const headers = {} as Record<string, string>;
 
-  if (ctx?.req.cookies.access_token) {
-    headers["authorization"] = ctx.req.cookies.access_token;
-  } else if (ctx?.req.cookies.refresh_token) {
-    headers["refresh_token"] = ctx.req.cookies.refresh_token;
+  //! Cookies
+  if (ctx?.req.cookies["x-access-token"]) {
+    headers["authorization"] = ctx.req.cookies["x-access-token"];
+  }
+  if (ctx?.req.cookies["x-refresh-token"]) {
+    headers["x-refresh-token"] = ctx.req.cookies["x-refresh-token"];
+  }
+
+  //! Header (if cookies not existed)
+  if (ctx?.req.headers["authorization"] && !headers["authorization"]) {
+    headers["authorization"] = ctx.req.headers["authorization"];
+  }
+  if (ctx?.req.headers["x-refresh-token"] && !headers["x-refresh-token"]) {
+    headers["x-refresh-token"] = ctx.req.cookies["x-refresh-token"];
   }
 
   const _apolloClient =

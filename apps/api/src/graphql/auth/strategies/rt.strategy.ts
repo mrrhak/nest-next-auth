@@ -15,33 +15,40 @@ const logger = new Logger('RtStrategy');
 
 @Injectable()
 export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
-  constructor(readonly configService: ConfigLibService) {
+  constructor(private configService: ConfigLibService) {
     super({
       // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          let refresh_token: string | undefined;
+          let refreshToken: string | undefined;
 
-          //! From Header
+          //! From Header (Mobile and Web SSR)
           //? try to get token from header
           //? authorization header will available on SSG or SSR (Server side)
-          if (request.headers.refresh_token) {
-            refresh_token = request.headers.refresh_token as string;
-            if (refresh_token) {
-              logger.debug('Got refresh_token from SSR/SSG headers');
+          const refreshTokenHeader =
+            request.headers[this.configService.env.REFRESH_TOKEN_KEY];
+          if (refreshTokenHeader) {
+            refreshToken = refreshTokenHeader as string;
+            if (refreshToken) {
+              logger.debug(
+                `Got ${this.configService.env.REFRESH_TOKEN_KEY} from SSR/SSG headers`
+              );
             }
           }
-          //! From Cookie
+          //! From Cookie (Web client only)
           //? try to get token from cookies
           //? cookies will available on Browser (Client side)
           else {
-            refresh_token = request?.cookies['refresh_token'];
-            if (refresh_token) {
-              logger.debug('Got refresh_token from Browser cookies');
+            refreshToken =
+              request?.cookies[this.configService.env.REFRESH_TOKEN_KEY];
+            if (refreshToken) {
+              logger.debug(
+                `Got ${this.configService.env.REFRESH_TOKEN_KEY} from Browser cookies`
+              );
             }
           }
 
-          return refresh_token;
+          return refreshToken;
         }
       ]),
       ignoreExpiration: false,
@@ -53,7 +60,8 @@ export class RtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
 
   async validate(req: Request, payload: JwtPayload): Promise<any> {
     const refreshToken =
-      req.headers.refresh_token || req.cookies['refresh_token'];
+      req.headers[this.configService.env.REFRESH_TOKEN_KEY] ||
+      req.cookies[this.configService.env.REFRESH_TOKEN_KEY];
 
     return {
       ...payload,

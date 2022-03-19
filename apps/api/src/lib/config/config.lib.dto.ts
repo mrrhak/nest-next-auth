@@ -22,16 +22,16 @@ export class ConfigDto {
   JWT_RT_EXPIRE: string;
 
   @IsNotEmpty()
-  COOKIES_ACCESS_TOKEN_NAME: string;
+  ACCESS_TOKEN_KEY: string;
 
   @IsNotEmpty()
-  COOKIES_REFRESH_TOKEN_NAME: string;
+  REFRESH_TOKEN_KEY: string;
 
   @IsNotEmpty()
-  COOKIES_ACCESS_TOKEN_EXPIRED: string;
+  ACCESS_TOKEN_EXPIRED: string;
 
   @IsNotEmpty()
-  COOKIES_REFRESH_TOKEN_EXPIRED: string;
+  REFRESH_TOKEN_EXPIRED: string;
 
   @IsNotEmpty()
   THROTTLE_TTL: string;

@@ -1,4 +1,6 @@
+import { SessionService } from '@graphql/session/session.service';
 import { UserService } from '@graphql/user/user.service';
+import { ConfigLibService } from '@lib/config';
 import { HashLibService } from '@lib/hash';
 import { JwtLibService } from '@lib/jwt';
 import { Tokens } from '@lib/jwt/types';
@@ -11,7 +13,9 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly hashService: HashLibService,
-    private readonly jwtService: JwtLibService
+    private readonly sessionService: SessionService,
+    private readonly jwtService: JwtLibService,
+    private configService: ConfigLibService
   ) {}
 
   async register(input: RegisterInput): Promise<AuthModel> {
@@ -20,11 +24,18 @@ export class AuthService {
       username: input.username.toLowerCase(),
       email: input.email.toLowerCase()
     });
-    const tokens: Tokens = await this.jwtService.getTokens(user.id);
-    const hashRefreshToken = await this.hashService.hash(tokens.refreshToken);
-    await this.userService.update({
-      id: user.id,
-      refreshToken: hashRefreshToken
+    const tokens: Tokens = await this.jwtService.getTokens({
+      sub: user.id,
+      roles: user.roles
+    });
+
+    await this.sessionService.create({
+      userId: user.id,
+      expiredAt: new Date(
+        new Date().getTime() +
+          Number(this.configService.env.REFRESH_TOKEN_EXPIRED)
+      ),
+      ...tokens
     });
 
     return tokens;
@@ -49,39 +60,60 @@ export class AuthService {
       throw new ForbiddenException('Username or password is invalid');
     }
 
-    const tokens: Tokens = await this.jwtService.getTokens(user.id);
-    const hashRefreshToken = await this.hashService.hash(tokens.refreshToken);
-    await this.userService.update({
-      id: user.id,
-      refreshToken: hashRefreshToken
+    const tokens: Tokens = await this.jwtService.getTokens({
+      sub: user.id,
+      roles: user.roles
     });
+
+    await this.sessionService.create({
+      userId: user.id,
+      expiredAt: new Date(
+        new Date().getTime() +
+          Number(this.configService.env.REFRESH_TOKEN_EXPIRED)
+      ),
+      ...tokens
+    });
+
     return tokens;
   }
 
-  async logout(userId: string): Promise<boolean> {
+  async logout(userId: string, accessToken: string): Promise<boolean> {
     const user = await this.userService.findOne({ id: userId });
+
     if (user) {
-      await this.userService.update({ id: userId, refreshToken: null });
+      await this.sessionService.deleteByAccessToken(accessToken);
     }
     return true;
   }
 
   async renewToken(userId: string, rt: string): Promise<Tokens> {
-    const user = await this.userService.findOne({ id: userId });
-    if (!user || !user.refreshToken) {
-      throw new ForbiddenException('Refresh token is no longer available');
-    }
+    const [user, session] = await Promise.all([
+      //! Validate user
+      this.userService.findOne({ id: userId }),
+      //! Validate session
+      this.sessionService.findByRefreshToken(rt)
+    ]);
+    if (!user) throw new ForbiddenException('User no longer available');
+    if (!session) throw new ForbiddenException('Session expired');
 
-    const isMatched = await this.hashService.isMatch(rt, user.refreshToken);
-    if (!isMatched)
-      throw new ForbiddenException('Refresh token is miss matched');
-
-    const tokens: Tokens = await this.jwtService.getTokens(user.id);
-    const hashRefreshToken = await this.hashService.hash(tokens.refreshToken);
-    await this.userService.update({
-      id: user.id,
-      refreshToken: hashRefreshToken
+    const tokens: Tokens = await this.jwtService.getTokens({
+      sub: user.id,
+      roles: user.roles
     });
+    await Promise.all([
+      //! Delete old session
+      await this.sessionService.deleteByRefreshToken(rt),
+      //! Create new session
+      await this.sessionService.create({
+        userId: user.id,
+        expiredAt: new Date(
+          new Date().getTime() +
+            Number(this.configService.env.REFRESH_TOKEN_EXPIRED)
+        ),
+        ...tokens
+      })
+    ]);
+
     return tokens;
   }
 

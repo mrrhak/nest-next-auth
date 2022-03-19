@@ -18,6 +18,9 @@ export class UserModel extends BaseModel {
   @Field()
   email!: string;
 
+  @Field(() => [E.RoleEnum])
+  roles!: E.RoleEnum[];
+
   @Field(() => E.StatusEnum)
   status!: E.StatusEnum;
 }

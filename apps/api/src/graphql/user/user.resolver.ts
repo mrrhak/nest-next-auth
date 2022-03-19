@@ -1,9 +1,16 @@
-import { BadRequestException } from '@nestjs/common';
+import { E, GqlAtGuard } from '@common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { User } from '@schemas';
+import { AccessGuard, UseAbility } from 'nest-casl';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { GqlRolesGuard } from 'src/common/guards/gql-roles.guard';
 import { CreateUserInput, FilterUserInput } from './dto/user.input';
 import { PaginatedUserModel, UserModel } from './dto/user.model';
+import { UserHook } from './user.hook';
 import { UserService } from './user.service';
 
+@UseGuards(GqlAtGuard)
 @Resolver(() => UserModel)
 export class UserResolver {
   constructor(private userService: UserService) {}
@@ -25,8 +32,15 @@ export class UserResolver {
   }
 
   @Query(() => UserModel)
+  // @UseGuards(GqlRolesGuard, GqlAbilitiesGuard)
+  // @CheckAbilities(new ReadUserAbilityHandler())
+  @UseGuards(GqlRolesGuard, AccessGuard)
+  @UseGuards(AccessGuard)
+  @Roles(E.RoleEnum.ADMIN, E.RoleEnum.USER)
+  @UseAbility(E.ActionEnum.READ, User, UserHook)
   async getUser(@Args('id') id: string) {
-    return await this.userService.getUser({ id });
+    const user = await this.userService.getUser({ _id: id });
+    return user;
   }
 
   @Query(() => PaginatedUserModel)

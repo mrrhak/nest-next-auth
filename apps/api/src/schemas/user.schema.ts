@@ -23,14 +23,18 @@ export class User {
   password: string;
 
   @Prop({
+    type: [String],
+    enum: E.RoleEnum,
+    default: [E.RoleEnum.USER]
+  })
+  roles!: E.RoleEnum[];
+
+  @Prop({
     enum: Object.values(E.StatusEnum),
     default: E.StatusEnum.ACTIVE,
     createdIndex: true
   })
   status!: E.StatusEnum;
-
-  @Prop({ default: null })
-  refreshToken?: string;
 
   @Prop({ type: Types.ObjectId })
   createdBy?: Types.ObjectId;

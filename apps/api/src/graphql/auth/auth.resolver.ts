@@ -1,7 +1,8 @@
 import {
   GqlAtGuard,
-  GqlGetCurrentUser,
+  GqlGetAccessToken,
   GqlGetCurrentUserId,
+  GqlGetRefreshToken,
   GqlRtGuard
 } from '@common';
 import { UserModel } from '@graphql/user/dto/user.model';
@@ -36,26 +37,26 @@ export class AuthResolver {
     };
 
     ctx.res.cookie(
-      this.configService.env.COOKIES_ACCESS_TOKEN_NAME,
+      this.configService.env.ACCESS_TOKEN_KEY,
       `Bearer ${authModel.accessToken}`,
       {
         ...defaultCookieOptions,
-        maxAge: Number(this.configService.env.COOKIES_ACCESS_TOKEN_EXPIRED)
+        maxAge: Number(this.configService.env.ACCESS_TOKEN_EXPIRED)
       }
     );
     ctx.res.cookie(
-      this.configService.env.COOKIES_REFRESH_TOKEN_NAME,
+      this.configService.env.REFRESH_TOKEN_KEY,
       authModel.refreshToken,
       {
         ...defaultCookieOptions,
-        maxAge: Number(this.configService.env.COOKIES_REFRESH_TOKEN_EXPIRED)
+        maxAge: Number(this.configService.env.REFRESH_TOKEN_EXPIRED)
       }
     );
   }
 
   private _clearAuthCookies(ctx: any) {
-    ctx.res.clearCookie(this.configService.env.COOKIES_ACCESS_TOKEN_NAME);
-    ctx.res.clearCookie(this.configService.env.COOKIES_REFRESH_TOKEN_NAME);
+    ctx.res.clearCookie(this.configService.env.ACCESS_TOKEN_KEY);
+    ctx.res.clearCookie(this.configService.env.REFRESH_TOKEN_KEY);
   }
 
   @Mutation(() => AuthModel)
@@ -68,9 +69,9 @@ export class AuthResolver {
       this._setAuthCookies(ctx, authToken);
       return authToken;
     } catch (error: any) {
-      if (error.keyValue['username']) {
+      if (error?.keyValue['username']) {
         throw new BadRequestException('Username already exists');
-      } else if (error.keyValue['email']) {
+      } else if (error?.keyValue['email']) {
         throw new BadRequestException('Email already exists');
       } else {
         throw new BadRequestException('Something went wrong');
@@ -92,17 +93,18 @@ export class AuthResolver {
   @Mutation(() => Boolean)
   async logout(
     @GqlGetCurrentUserId() userId: string,
+    @GqlGetAccessToken() accessToken: string,
     @Context() ctx: any
   ): Promise<boolean> {
     this._clearAuthCookies(ctx);
-    return await this.authService.logout(userId);
+    return await this.authService.logout(userId, accessToken);
   }
 
   @UseGuards(GqlRtGuard)
   @Mutation(() => AuthModel)
   async renewToken(
     @GqlGetCurrentUserId() userId: string,
-    @GqlGetCurrentUser('refreshToken') refreshToken: string,
+    @GqlGetRefreshToken() refreshToken: string,
     @Context() ctx: any
   ): Promise<AuthModel> {
     try {

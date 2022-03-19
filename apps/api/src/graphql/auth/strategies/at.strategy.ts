@@ -21,26 +21,32 @@ export class AtStrategy extends PassportStrategy(Strategy, 'jwt') {
         (request: Request) => {
           let bearerToken: string | undefined;
 
-          //! From Header
+          //! From Header (Mobile and Web SSR)
           //? try to get token from header
           //? authorization header will available on SSG or SSR (Server side)
-          if (request.headers.authorization) {
-            bearerToken = request.headers.authorization;
+          if (request.headers.authorization || request.headers.Authorization) {
+            bearerToken = (request.headers.authorization ||
+              request.headers.Authorization) as string;
             if (bearerToken) {
-              logger.debug('Got access_token from SSR/SSG headers');
+              logger.debug(
+                `Got ${this.configService.env.ACCESS_TOKEN_KEY} from SSR/SSG headers`
+              );
             }
           }
-          //! From Cookie
+          //! From Cookie (Web client only)
           //? try to get token from cookies
           //? cookies will available on Browser (Client side)
           else {
-            bearerToken = request?.cookies['access_token'];
+            bearerToken =
+              request?.cookies[this.configService.env.ACCESS_TOKEN_KEY];
             if (bearerToken) {
-              logger.debug('Got access_token from Browser cookies');
+              logger.debug(
+                `Got ${this.configService.env.ACCESS_TOKEN_KEY} from Browser cookies`
+              );
             }
           }
 
-          if (!bearerToken) {
+          if (!bearerToken || !bearerToken.startsWith('Bearer ')) {
             return null;
           }
           const token = bearerToken.replace('Bearer ', '').trim();

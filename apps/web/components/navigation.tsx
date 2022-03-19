@@ -10,17 +10,27 @@ const Navigation = () => {
         <Link href="/">
           <a className={router.pathname == "/" ? "text-gray-900" : ""}>Home</a>
         </Link>
-        <Link href="/me">
-          <a className={router.pathname == "/me" ? "text-gray-900" : ""}>CSR</a>
-        </Link>
-        <Link href="/me-ssr">
-          <a className={router.pathname == "/me-ssr" ? "text-gray-900" : ""}>
-            SSR
-          </a>
-        </Link>
         <Link href="/realtime">
           <a className={router.pathname == "/realtime" ? "text-gray-900" : ""}>
             Realtime
+          </a>
+        </Link>
+        <Link href="/account/profile-ssg">
+          <a
+            className={
+              router.pathname == "/account/profile-ssg" ? "text-gray-900" : ""
+            }
+          >
+            Profile SSG
+          </a>
+        </Link>
+        <Link href="/account/profile-ssr">
+          <a
+            className={
+              router.pathname == "/account/profile-ssr" ? "text-gray-900" : ""
+            }
+          >
+            Profile SSR
           </a>
         </Link>
       </div>

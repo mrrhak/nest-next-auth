@@ -1,16 +1,32 @@
 import {LockClosedIcon, UserIcon} from "@heroicons/react/outline";
 import {useRouter} from "next/router";
+import {useCallback} from "react";
 import {useForm} from "react-hook-form";
+import {toast, TypeOptions} from "react-toastify";
 import {useRegisterMutation} from "../../generated/graphql";
 
 const Register = () => {
   const router = useRouter();
-  const [registerMutation, {data, loading, error}] = useRegisterMutation();
+  const [registerMutation, {data, loading}] = useRegisterMutation();
   const {
     register,
     handleSubmit,
     formState: {errors},
   } = useForm();
+
+  //! Toast
+  const notify = useCallback((type: TypeOptions, message: string) => {
+    toast(message, {
+      position: "top-center",
+      autoClose: 5000,
+      type,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+  }, []);
 
   const onSubmit = async (data: any) => {
     const {firstName, lastName, username, email, password} = data;
@@ -26,13 +42,13 @@ const Register = () => {
           },
         },
       });
-    } catch (_) {}
+    } catch (error) {
+      notify("error", error.message);
+    }
   };
 
   if (data) {
     router.push("/account/profile");
-  } else if (error) {
-    console.log(error.message);
   }
 
   return (

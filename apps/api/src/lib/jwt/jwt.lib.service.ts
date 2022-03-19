@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { readFileSync } from 'fs';
 import path from 'path';
-import { Tokens } from './types';
+import { JwtPayload, Tokens } from './types';
 
 const privateKey = readFileSync(
   path.resolve(__dirname, './../../../jwt_rsa/jwtRS256.key')
@@ -16,10 +16,11 @@ export class JwtLibService {
     private readonly configService: ConfigLibService
   ) {}
 
-  async getTokens(userId: string | number): Promise<Tokens> {
+  async getTokens(payload: JwtPayload): Promise<Tokens> {
+    const { sub, roles } = payload;
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(
-        { sub: userId },
+        { sub, roles },
         {
           algorithm: 'RS256',
           privateKey,
@@ -28,7 +29,7 @@ export class JwtLibService {
         }
       ),
       this.jwtService.signAsync(
-        { sub: userId },
+        { sub },
         {
           algorithm: 'RS256',
           privateKey,
