@@ -1,8 +1,10 @@
 import Link from "next/link";
 import {useRouter} from "next/router";
+import {useAuth} from "../contexts/auth-context";
 
 const Navigation = () => {
   const router = useRouter();
+  const {authUser, loading, logout} = useAuth();
 
   return (
     <div className="fixed top-0 w-full">
@@ -33,6 +35,19 @@ const Navigation = () => {
             Profile SSR
           </a>
         </Link>
+        {loading && <p>Loading...</p>}
+        {
+          //! if have user display logout button
+          !loading && authUser && <button onClick={logout}>Logout</button>
+        }
+        {
+          //! if no user display login button
+          !loading && !authUser && (
+            <Link href="/auth/login">
+              <a>Login</a>
+            </Link>
+          )
+        }
       </div>
     </div>
   );

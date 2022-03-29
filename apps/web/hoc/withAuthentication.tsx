@@ -130,6 +130,7 @@ const queryAuthUser = async (
 ): Promise<GetAuthUserQuery | null> => {
   const {data} = await client.query<GetAuthUserQuery>({
     query: GetAuthUserDocument,
+    fetchPolicy: "no-cache",
   });
   if (!data) return null;
   return data;

@@ -5,10 +5,12 @@ import {UserIcon, LockClosedIcon} from "@heroicons/react/outline";
 import Image from "next/image";
 import {useCallback} from "react";
 import {toast, TypeOptions} from "react-toastify";
+import {useAuth} from "../../contexts/auth-context";
 
 const Login = () => {
   const router = useRouter();
-  const [loginMutation, {data, loading}] = useLoginMutation();
+  const {login} = useAuth();
+  const [loginMutation, {loading}] = useLoginMutation();
 
   //! Toast
   const notify = useCallback((type: TypeOptions, message: string) => {
@@ -33,7 +35,7 @@ const Login = () => {
   const onSubmit = async (data: any) => {
     const {usernameOrEmail, password} = data;
     try {
-      await loginMutation({
+      const {data} = await loginMutation({
         variables: {
           input: {
             usernameOrEmail,
@@ -41,14 +43,14 @@ const Login = () => {
           },
         },
       });
+      if (data) {
+        await login();
+        router.push("/");
+      }
     } catch (error) {
       notify("error", error.message);
     }
   };
-
-  if (data) {
-    router.push("/");
-  }
 
   return (
     <div className="w-full h-screen flex flex-col bg-gray-100 items-center justify-center px-6">

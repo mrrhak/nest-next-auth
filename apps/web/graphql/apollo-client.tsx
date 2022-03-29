@@ -38,7 +38,7 @@ export const getRenewAuthToken = async (
 //! Working only client side fetching
 const _errorLink = onError(
   ({graphQLErrors, networkError, operation, forward}) => {
-    console.log("OnError is activated", operation.operationName);
+    console.log("OnError: ", operation.operationName);
     try {
       if (graphQLErrors) {
         graphQLErrors.map(({message, locations, path}) =>
@@ -52,6 +52,7 @@ const _errorLink = onError(
 
           // redirect to login
           Router.push("/auth/login");
+          return;
         }
 
         for (let err of graphQLErrors) {
