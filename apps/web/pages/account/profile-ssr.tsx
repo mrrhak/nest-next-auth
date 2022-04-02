@@ -1,8 +1,5 @@
 import {GetServerSideProps} from "next";
-import {useRouter} from "next/router";
-import {useCallback} from "react";
-import {useAuth} from "../../contexts/auth-context";
-import {GetAuthUserQuery, useLogoutMutation} from "../../generated/graphql";
+import {GetAuthUserQuery} from "../../generated/graphql";
 import {withAuthentication} from "../../hoc/withAuthentication";
 
 type ProfileProps = {
@@ -10,9 +7,6 @@ type ProfileProps = {
 };
 
 const ProfileSSR = ({authUser}: ProfileProps) => {
-  const router = useRouter();
-  const {logout} = useAuth();
-
   return (
     <div>
       <h1>Profile</h1>
@@ -20,7 +14,6 @@ const ProfileSSR = ({authUser}: ProfileProps) => {
       <p>{authUser.getAuthUser.lastName}</p>
       <p>{authUser.getAuthUser.username}</p>
       <p>{authUser.getAuthUser.email}</p>
-      <button onClick={logout}>Logout</button>
     </div>
   );
 };
